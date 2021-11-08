@@ -39,3 +39,6 @@ M=D
 @result
 D=M
 @2
+(INFINITE_LOOP)
+@INFINITE_LOOP
+0;JMP
