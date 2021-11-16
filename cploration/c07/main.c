@@ -1,5 +1,5 @@
 int main()
-{        
+{         
     // Create empty item
     struct Symbol* item = (struct Symbol*) malloc(sizeof(struct Symbol));
     item->name = NULL;  
