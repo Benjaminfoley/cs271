@@ -39,5 +39,34 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    DMux(in=true, sel = instruction[15], a =addrinst, b= compinst);
+    And16(a=instruction, b= true, out[0]= cinstjbit3,out[1]=cinstjbit2,out[2]=cinstjbit1,out[3]=cinstdbit3,out[4]=cinstdbit2,out[5]=cinstdbit1,out[6]= cinstcbit6,out[7]=cinstcbit5,out[8]=cinstcbit4,out[9]= cinstcbit3,out[10]= cinstcbit2,out[11] = cinstcbit1, out[12]= cinstabit, out[0..14]= aaddr);
+
+// This is the a register
+    Mux16(sel= addrinst, a=ALUout, b = instruction, out= ain);
+    Or(a= cinstdbit1 , b= addrinst, out= aload);
+    ARegister(in= ain, load= aload, out= aout, out[0..14]=addressM);
+
+//d register
+    And(a = cinstdbit2, b= compinst, out=dload);
+    DRegister(in=ALUout, load=dload, out =Dout);
+//ALU
+    Mux16(sel=cinstabit, a= aout, b= inM, out= aorm);
+    ALU(x=Dout, y= aorm, zx=cinstcbit1, nx= cinstcbit2, zy=cinstcbit3, ny=cinstcbit4, f= cinstcbit5, no= cinstcbit6, out=ALUout, out=outM, zr=zr, ng=ng);
+    And(a=cinstdbit3, b=compinst, out= writeM);
+    
+//Jumping    
+    Or(a=zr, b=ng, out=zrandng);
+    Not(in=zrandng, out=ps);
+    And(a=cinstjbit1, b=ng, out=jlt);
+    And(a=cinstjbit2, b=zr, out=jeq);
+    And(a=cinstjbit3, b=ps, out=jgt);
+
+    Or(a = jlt, b=jeq, out=jmp1);
+    Or(a= jmp1, b= jgt, out=jmp2);
+    And(a= jmp2, b=compinst, out=jmp);
+
+//PC
+    Not(in=jmp, out=inc);
+    PC(in=aout, load=jmp, inc= inc, reset=reset, out[0..14]=pc);
 }
