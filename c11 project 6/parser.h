@@ -1,10 +1,13 @@
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
-#include<ctype.h>
-#include<stdint.h>
-#include<stdbool.h>
-#include"hack.h"
+#ifndef __PARSER_H__
+#define __PARSER_H__
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include "symtable.h"
+#include "hack.h"
 #ifndef __PARSER_H__
 #define __PARSER_H__
 #define MAX_LINE_LENGTH  200
@@ -14,9 +17,17 @@
 typedef int16_t hack_addr;
 typedef int16_t opcode;
 char *strip(char *s);
-void parse(FILE * file);
-bool is_label(const char*)
 char *extract_label(const char *line, char* label);
+int parse(FILE * file, instruction *instructions);
+bool is_label(const char*)
+bool parse_A_instruction(const char *line, a_instruction *instr);
+bool is_Atype(const char*);
+bool is_label(const char*);
+bool is_Ctype(const char*);
+void parse_C_instruction(char *line, c_instruction *instr);
+void add_predefined_symbols();
+void assemble(const char * file_name, instruction* instructions, int num_instructions);
+opcode instruction_to_opcode(c_instruction instr);
 enum instr_type {
     Invalid = -1,
     A_type,
@@ -39,16 +50,9 @@ typedef struct a_instruction {
 
 typedef struct instruction {
     union {
-        enum instr_type a_instruction;
-        enum instr_type c_instruction;
-    } ;
+        a_instruction a_instr;
+        c_instruction c_instr;
+    };
     bool instr_type;
 } instruction;
-
-void add_predefined_symbols();
-
-bool parse_A_instruction(const char *line, a_instruction *instr);
-
-void parse_C_instruction(char *line, c_instruction *instr);
-
 #endif
